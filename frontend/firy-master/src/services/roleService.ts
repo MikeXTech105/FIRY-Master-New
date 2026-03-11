@@ -14,9 +14,12 @@ export const deleteRole = async (id: number) => {
   });
   return response.data;
 };
-export const toggleRoleStatus = async (id: number) => {
-  const response = await api.post(`/Role/ActivateRole`, null, {
-    params: { ID: id }
+export const toggleRoleStatus = async (id: number, isActive: boolean) => {
+  const response = await api.post(`/Role/ActiveRole`, null, {
+    params: {
+      ID: id,
+      isActive: isActive
+    }
   });
 
   return response.data;

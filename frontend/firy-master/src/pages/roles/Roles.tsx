@@ -3,7 +3,9 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import { getRoles } from "../../services/roleService";
 import AddRoleModal from "../roles/AddRoleModal";
 import { deleteRole } from "../../services/roleService";
+import { toggleRoleStatus } from "../../services/roleService";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 export default function Roles() {
 
@@ -18,7 +20,6 @@ export default function Roles() {
 
 
     const handleDelete = async (id: number) => {
-
         const confirmDelete = confirm("Are you sure you want to delete this role?");
 
         if (!confirmDelete) return;
@@ -27,22 +28,26 @@ export default function Roles() {
 
             await deleteRole(id);
 
+            toast.success("Role deleted successfully");
+
             fetchRoles();
 
         } catch (error) {
-            console.error("Delete role error:", error);
+            toast.error("Failed to delete role");
         }
     };
 
-    const handleToggleStatus = async (id: number) => {
+    const handleToggleStatus = async (id: number, currentStatus: boolean) => {
         try {
 
-            await toggleRoleStatus(id);
+            await toggleRoleStatus(id, !currentStatus);
+
+            toast.success("Role status updated");
 
             fetchRoles();
 
         } catch (error) {
-            console.error("Toggle role error:", error);
+            toast.error("Failed to update role status");
         }
     };
     const fetchRoles = async () => {
@@ -147,9 +152,9 @@ export default function Roles() {
                                     <td className="p-3 flex gap-2">
 
                                         <button
-                                            onClick={() => handleToggleStatus(role.id)}
+                                            onClick={() => handleToggleStatus(role.id, role.isActive)}
                                             className={`px-3 py-1 rounded text-white text-sm 
-    ${role.isActive ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-500 hover:bg-green-600"}`}
+  ${role.isActive ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-500 hover:bg-green-600"}`}
                                         >
                                             {role.isActive ? "Deactivate" : "Activate"}
                                         </button>
@@ -195,10 +200,10 @@ export default function Roles() {
         </DashboardLayout>
     );
 }
-export const toggleRoleStatus = async (id: number) => {
-    const response = await api.post(`/Role/ActivateRole`, null, {
-        params: { ID: id }
-    });
+// export const toggleRoleStatus = async (id: number) => {
+//     const response = await api.post(`/Role/ActivateRole`, null, {
+//         params: { ID: id }
+//     });
 
-    return response.data;
-};
+//     return response.data;
+// };

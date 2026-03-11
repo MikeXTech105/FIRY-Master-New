@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createRole } from "../../services/roleService";
+import toast from "react-hot-toast";
 
 export default function AddRoleModal({ closeModal, refreshRoles }: any) {
 
@@ -19,11 +20,13 @@ export default function AddRoleModal({ closeModal, refreshRoles }: any) {
 
             await createRole(roleName);
 
+            toast.success("Role created successfully");
+
             refreshRoles();
             closeModal();
 
         } catch (error) {
-            console.error("Create role error", error);
+            toast.error("Failed to create role");;
         } finally {
             setLoading(false);
         }

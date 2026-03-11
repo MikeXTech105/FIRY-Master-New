@@ -14,23 +14,46 @@ export default function Sidebar() {
 
         <NavLink
           to="/dashboard"
-          className="block px-4 py-2 rounded hover:bg-gray-700"
+          className={({ isActive }) =>
+            `block px-4 py-2 rounded transition ${
+              isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            }`
+          }
         >
-          Dashboard
+          📊 Dashboard
         </NavLink>
 
         <NavLink
           to="/users"
-          className="block px-4 py-2 rounded hover:bg-gray-700"
+          className={({ isActive }) =>
+            `block px-4 py-2 rounded transition ${
+              isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            }`
+          }
         >
-          Users
+          👤 Users
         </NavLink>
 
         <NavLink
           to="/roles"
-          className="block px-4 py-2 rounded hover:bg-gray-700"
+          className={({ isActive }) =>
+            `block px-4 py-2 rounded transition ${
+              isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            }`
+          }
         >
-          Roles
+          🛡 Roles
+        </NavLink>
+
+        <NavLink
+          to="/candidate"
+          className={({ isActive }) =>
+            `block px-4 py-2 rounded transition ${
+              isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            }`
+          }
+        >
+          🧑‍💼 Candidates
         </NavLink>
 
       </nav>
