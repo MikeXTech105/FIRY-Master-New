@@ -1,3 +1,4 @@
+import axios from "axios";
 import api from "./api";
 
 export const getCandidates = async () => {
@@ -20,6 +21,9 @@ export const deleteCandidate = async (id: number) => {
 
   return response.data;
 };
+// export const deleteCandidate = async (id: number) => {
+//   return axios.post(`/api/Candidate/DeleteCandidate?ID=${id}`);
+// };
 
 export const toggleCandidateStatus = async (id: number, isActive: boolean) => {
   const response = await api.post("/Candidate/IsActiveCandidate", null, {
@@ -61,4 +65,9 @@ export const createCandidate = async (data: any) => {
   );
 
   return response.data;
+};
+export const viewResume = async (resumeFilePath: string) => {
+  return axios.get(`/api/Candidate/view-resume?resumeFilePath=${resumeFilePath}`, {
+    responseType: "blob"
+  });
 };

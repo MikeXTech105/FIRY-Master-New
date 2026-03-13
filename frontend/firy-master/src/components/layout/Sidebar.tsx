@@ -15,8 +15,7 @@ export default function Sidebar() {
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
-            `block px-4 py-2 rounded transition ${
-              isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            `block px-4 py-2 rounded transition ${isActive ? "bg-gray-700" : "hover:bg-gray-700"
             }`
           }
         >
@@ -26,8 +25,7 @@ export default function Sidebar() {
         <NavLink
           to="/users"
           className={({ isActive }) =>
-            `block px-4 py-2 rounded transition ${
-              isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            `block px-4 py-2 rounded transition ${isActive ? "bg-gray-700" : "hover:bg-gray-700"
             }`
           }
         >
@@ -37,8 +35,7 @@ export default function Sidebar() {
         <NavLink
           to="/roles"
           className={({ isActive }) =>
-            `block px-4 py-2 rounded transition ${
-              isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            `block px-4 py-2 rounded transition ${isActive ? "bg-gray-700" : "hover:bg-gray-700"
             }`
           }
         >
@@ -48,12 +45,20 @@ export default function Sidebar() {
         <NavLink
           to="/candidate"
           className={({ isActive }) =>
-            `block px-4 py-2 rounded transition ${
-              isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            `block px-4 py-2 rounded transition ${isActive ? "bg-gray-700" : "hover:bg-gray-700"
             }`
           }
         >
           🧑‍💼 Candidates
+        </NavLink>
+        <NavLink
+          to="/emails"
+          className={({ isActive }) =>
+            `block px-4 py-2 rounded transition ${isActive ? "bg-gray-700" : "hover:bg-gray-700"
+            }`
+          }
+        >
+          📧 Emails
         </NavLink>
 
       </nav>

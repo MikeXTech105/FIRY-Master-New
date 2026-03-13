@@ -7,7 +7,8 @@ import AddCandidateModal from "../candidate/AddCandidateModal";
 import {
     getCandidates,
     deleteCandidate,
-    toggleCandidateStatus
+    toggleCandidateStatus,
+    viewResume
 } from "../../services/candidateService";
 
 export default function Candidate() {
@@ -15,6 +16,8 @@ export default function Candidate() {
     const [candidates, setCandidates] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+    const [showResumeModal, setShowResumeModal] = useState(false);
 
     useEffect(() => {
         fetchCandidates();
@@ -41,29 +44,52 @@ export default function Candidate() {
             setLoading(false);
         }
     };
+    // const handleViewResume = (resumeFilePath: string) => {
 
+    //     const baseUrl = "http://192.168.1.71:5000";
+
+    //     window.open(`${baseUrl}${resumeFilePath}`, "_blank");
+
+    // };
+    const handleViewResume = (resumeFilePath: string) => {
+
+        const url = `${import.meta.env.VITE_API_BASE_URL}/Candidate/view-resume?resumeFilePath=${encodeURIComponent(resumeFilePath)}`;
+
+        setResumeUrl(url);
+        setShowResumeModal(true);
+
+    };
+    // const handleDelete = async (id: number) => {
+
+    //     const confirmDelete = confirm("Are you sure you want to delete this candidate?");
+
+    //     if (!confirmDelete) return;
+
+    //     try {
+
+    //         await deleteCandidate(id);
+
+    //         toast.success("Candidate deleted successfully");
+
+    //         fetchCandidates();
+
+    //     } catch (error) {
+
+    //         toast.error("Delete failed");
+
+    //         console.error(error);
+
+    //     }
+
+    // };
     const handleDelete = async (id: number) => {
-
-        const confirmDelete = confirm("Are you sure you want to delete this candidate?");
-
-        if (!confirmDelete) return;
-
         try {
-
             await deleteCandidate(id);
-
             toast.success("Candidate deleted successfully");
-
-            fetchCandidates();
-
+            getCandidates(); // refresh list
         } catch (error) {
-
-            toast.error("Delete failed");
-
-            console.error(error);
-
+            toast.error("Error deleting candidate");
         }
-
     };
 
     const handleToggleStatus = async (id: number, current: boolean) => {
@@ -180,14 +206,12 @@ export default function Candidate() {
 
                                     <td className="p-3">
                                         {c.resumeFilePath ? (
-                                            <a
-                                                href={c.resumeFilePath}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                            <button
+                                                onClick={() => handleViewResume(c.resumeFilePath)}
                                                 className="text-blue-600 underline"
                                             >
                                                 View
-                                            </a>
+                                            </button>
                                         ) : (
                                             "-"
                                         )}
@@ -224,7 +248,7 @@ export default function Candidate() {
                                         >
                                             Delete
                                         </button>
-                                    
+
 
                                     </td>
 
@@ -245,6 +269,43 @@ export default function Candidate() {
                 />
             )}
 
+            {/* Resume Preview */}
+            {showResumeModal && resumeUrl && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+
+                    <div className="bg-white w-[80%] h-[85%] rounded shadow-lg flex flex-col">
+
+                        {/* Header */}
+                        <div className="flex justify-between items-center p-4 border-b">
+
+                            <h2 className="text-lg font-semibold">
+                                Resume Preview
+                            </h2>
+
+                            <button
+                                onClick={() => setShowResumeModal(false)}
+                                className="text-red-500 font-bold"
+                            >
+                                ✖ Close
+                            </button>
+
+                        </div>
+
+                        {/* PDF */}
+                        <div className="flex-1">
+                            <iframe
+                                src={resumeUrl}
+                                width="100%"
+                                height="100%"
+                                title="Resume"
+                                className="border"
+                            />
+                        </div>
+
+                    </div>
+
+                </div>
+            )}
         </DashboardLayout>
     );
 }
