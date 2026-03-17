@@ -1,13 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { createCandidate } from "../../services/candidateService";
+import { getRoles } from "../../services/roleService";
 
 export default function AddCandidateModal({ closeModal, refreshCandidates }: any) {
 
   const [form, setForm] = useState<any>({});
   const [file, setFile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [selectedRole, setSelectedRole] = useState("");
 
+  useEffect(() => {
+    console.log("Component mounted");
+    fetchRoles();
+  }, []);
+
+  // const fetchRoles = async () => {
+  //   try {
+  //     const res = await getRoles();
+  //     setRoles(res?.data?.data || res?.data || []);
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Failed to load roles");
+  //   }
+  // };
+
+  const fetchRoles = async () => {
+    try {
+      console.log("🔥 calling API...");
+      const res = await getRoles();
+      setRoles(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const handleChange = (e: any) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -16,7 +43,12 @@ export default function AddCandidateModal({ closeModal, refreshCandidates }: any
     e.preventDefault();
     try {
       setLoading(true);
-      await createCandidate({ ...form, resumeFile: file });
+      // await createCandidate({ ...form, resumeFile: file });
+      await createCandidate({
+        ...form,
+        roleId: Number(selectedRole),
+        resumeFile: file
+      });
       toast.success("Candidate created");
       refreshCandidates();
       closeModal();
@@ -26,7 +58,7 @@ export default function AddCandidateModal({ closeModal, refreshCandidates }: any
       setLoading(false);
     }
   };
-
+  // console.log("API RESPONSE 👉", res);
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
 
@@ -71,14 +103,30 @@ export default function AddCandidateModal({ closeModal, refreshCandidates }: any
                   className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 />
               </div>
+
               <div>
                 <label className="text-xs font-medium text-gray-600 block mb-1.5">Role ID</label>
-                <input
-                  name="roleId"
-                  placeholder="e.g. 3"
-                  onChange={handleChange}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
+                <div className="relative">
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white appearance-none cursor-pointer pr-10"
+                  >
+                    <option value="">Select Role</option>
+                    {roles?.map((role: any) => (
+                      <option key={role.id} value={role.id}>
+                        {role.roleName}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Custom Arrow */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
 
