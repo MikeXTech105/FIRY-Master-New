@@ -50,6 +50,15 @@ export default function Sidebar() {
         </svg>
       ),
     },
+    {
+      to: "/email-settings",
+      label: "Email Settings",
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m0 0l4-4m-4 4l4 4M4 6h16M4 18h16" />
+        </svg>
+      ),
+    }
   ];
 
   return (
@@ -85,10 +94,9 @@ export default function Sidebar() {
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
-                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
+                : "text-gray-400 hover:bg-gray-800 hover:text-white"
               }`
             }
           >
