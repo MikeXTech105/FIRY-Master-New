@@ -4,7 +4,7 @@ import { getRoles } from "../../services/roleService";
 import AddRoleModal from "../roles/AddRoleModal";
 import { deleteRole } from "../../services/roleService";
 import { toggleRoleStatus } from "../../services/roleService";
-import api from "../../services/api";
+// import api from "../../services/api";
 import toast from "react-hot-toast";
 
 export default function Roles() {

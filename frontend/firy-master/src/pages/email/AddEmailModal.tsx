@@ -12,7 +12,7 @@ export default function AddEmailModal({ closeModal, refreshEmails }: Props) {
 
   const [emails, setEmails] = useState("");
   // const [roleId, setRoleId] = useState(0);
-  const [form, setForm] = useState<any>({});
+  // const [form, setForm] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [roles, setRoles] = useState<any[]>([]);
   const [selectedRole, setSelectedRole] = useState("");

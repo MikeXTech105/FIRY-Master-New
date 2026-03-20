@@ -6,8 +6,8 @@ import AddCandidateModal from "../candidate/AddCandidateModal";
 import {
     getCandidates,
     deleteCandidate,
-    toggleCandidateStatus,
-    viewResume
+    toggleCandidateStatus
+    // viewResume
 } from "../../services/candidateService";
 
 export default function Candidate() {
