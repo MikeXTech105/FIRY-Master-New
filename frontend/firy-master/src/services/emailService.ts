@@ -5,7 +5,7 @@ export const addEmails = async (data: any) => {
   return res.data;
 };
 
-export const getEmails = async () => {
-  const res = await api.get("/Email/GetEmails");
+export const getEmails = async (params: any) => {
+  const res = await api.post("/Email/GetEmail", params);
   return res.data;
 };

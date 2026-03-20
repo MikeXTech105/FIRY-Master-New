@@ -4,6 +4,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import Roles from "../pages/roles/Roles";
 import Candidate from "../pages/candidate/candidate";
 import Emails from "../pages/email/Emails";
+import EmailSettings from "../pages/emailSettings/EmailSettings";
 
 function AppRoutes() {
   return (
@@ -15,6 +16,7 @@ function AppRoutes() {
         <Route path="/roles" element={<Roles />} />
         <Route path="/candidate" element={<Candidate />} />
         <Route path="/emails" element={<Emails />} />
+        <Route path="/email-settings" element={<EmailSettings />} />
       </Routes>
     </BrowserRouter>
   );
