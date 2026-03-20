@@ -23,5 +23,12 @@ namespace FIRYMaster.Application.Services
 
             return await _userRepository.Login(request.Email, hashPassword);
         }
+        public async Task<APIResponseDto> CreateUser(UserRequest request)
+        {
+            var hashPassword = PasswordHasher.GenerateHash(request.Password);
+            request.Password = hashPassword;
+
+            return await _userRepository.CreateUser(request);
+        }
     }
 }

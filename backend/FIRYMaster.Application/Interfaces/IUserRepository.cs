@@ -9,5 +9,6 @@ namespace FIRYMaster.Application.Interfaces
     public interface IUserRepository
     {
         Task<LoginResponseDto> Login(string email, string passwordHash);
+        Task<APIResponseDto> CreateUser(UserRequest request);
     }
 }

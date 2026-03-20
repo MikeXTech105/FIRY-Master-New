@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using FIRYMaster.Application.Common;
 using FIRYMaster.Application.DTOs;
 using FIRYMaster.Application.Interfaces;
 using FIRYMaster.Domain.Entities;
@@ -33,6 +34,22 @@ namespace FIRYMaster.Infrastructure.Persistence.Repositories
                 responseDto = await connection.QueryFirstAsync<LoginResponseDto>("sp_LoginUser", parameters, commandType: CommandType.StoredProcedure);
             }
             return responseDto;
+        }
+        public async Task<APIResponseDto> CreateUser(UserRequest request)
+        {
+           APIResponseDto response = new APIResponseDto();
+            using (var connection = _context.CreateConnection())
+            {
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@FirstName", request.FirstName);
+                parameters.Add("@LastName", request.LastName);
+                parameters.Add("@Email", request.Email);
+                parameters.Add("@Password", request.Password);
+
+                response = await connection.QueryFirstAsync<APIResponseDto>("sp_CreateUser", parameters, commandType: CommandType.StoredProcedure);
+            }
+            return response;
         }
     }
 }

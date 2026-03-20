@@ -1,3 +1,4 @@
+using FIRYMaster.API.Extensions;
 using FIRYMaster.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -51,6 +52,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddInfrastructure();
+
+builder.Services.AddHostedService<EmailBackgroundService>();
 
 var app = builder.Build();
 

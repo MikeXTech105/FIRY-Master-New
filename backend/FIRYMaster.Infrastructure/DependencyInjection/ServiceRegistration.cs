@@ -31,6 +31,10 @@ namespace FIRYMaster.Infrastructure.DependencyInjection
 
             services.AddScoped<EmailService>();
 
+            services.AddScoped<IEmailSettingsRepository, EmailSettingsRepository>();
+
+            services.AddScoped<EmailSettingsService>();
+
             return services;
         }
     }

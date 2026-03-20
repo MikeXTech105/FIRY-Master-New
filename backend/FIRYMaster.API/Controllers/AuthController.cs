@@ -38,6 +38,20 @@ namespace FIRYMaster.API.Controllers
             }
             return this.StatusCode((int)HttpStatusCode.OK, response);
         }
+        [HttpPost("CreateUser")]
+        public async Task<IActionResult> CreateUser(UserRequest request)
+        {
+            APIResponseDto response = new APIResponseDto();
+            try
+            {
+                response = await _authService.CreateUser(request);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
+            }
+            return this.StatusCode((int)HttpStatusCode.OK, response);
+        }
 
         private string GenerateTokenJWT(string email)
         {
