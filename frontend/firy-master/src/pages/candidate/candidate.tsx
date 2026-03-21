@@ -17,6 +17,7 @@ export default function Candidate() {
     const [showModal, setShowModal] = useState(false);
     const [resumeUrl, setResumeUrl] = useState<string | null>(null);
     const [showResumeModal, setShowResumeModal] = useState(false);
+    const [togglingId, setTogglingId] = useState<number | null>(null);
 
     useEffect(() => {
         fetchCandidates();
@@ -46,7 +47,7 @@ export default function Candidate() {
         try {
             await deleteCandidate(id);
             toast.success("Candidate deleted successfully");
-            getCandidates();
+            fetchCandidates();
         } catch (error) {
             toast.error("Error deleting candidate");
         }
@@ -54,12 +55,15 @@ export default function Candidate() {
 
     const handleToggleStatus = async (id: number, current: boolean) => {
         try {
+            setTogglingId(id);
             await toggleCandidateStatus(id, !current);
-            toast.success("Status updated");
+            toast.success(`Candidate ${!current ? "activated" : "deactivated"} successfully`);
             fetchCandidates();
         } catch (error) {
             console.error(error);
             toast.error("Status update failed");
+        } finally {
+            setTogglingId(null);
         }
     };
 
@@ -192,44 +196,68 @@ export default function Candidate() {
                                     )}
                                 </td>
 
+                                {/* Status — animated toggle switch */}
                                 <td className="px-5 py-3.5">
-                                    {c.isActive ? (
-                                        <span className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                            Active
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-semibold">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                                            Inactive
-                                        </span>
-                                    )}
+                                    <button
+                                        onClick={() => handleToggleStatus(c.id, c.isActive)}
+                                        disabled={togglingId === c.id}
+                                        className="group relative flex items-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title={c.isActive ? "Click to Deactivate" : "Click to Activate"}
+                                    >
+                                        {/* Track */}
+                                        <div
+                                            className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out shadow-inner ${
+                                                c.isActive
+                                                    ? "bg-green-500 shadow-green-200"
+                                                    : "bg-red-400 shadow-red-100"
+                                            }`}
+                                        >
+                                            {/* Glow ring */}
+                                            <span
+                                                className={`absolute inset-0 rounded-full transition-all duration-300 ${
+                                                    c.isActive
+                                                        ? "ring-2 ring-green-300 ring-offset-1 opacity-60"
+                                                        : "ring-2 ring-red-300 ring-offset-1 opacity-60"
+                                                }`}
+                                            />
+
+                                            {/* Thumb */}
+                                            <span
+                                                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md
+                                                    transform transition-all duration-300 ease-in-out
+                                                    flex items-center justify-center
+                                                    ${c.isActive ? "translate-x-5" : "translate-x-0"}
+                                                    group-hover:scale-90`}
+                                            >
+                                                {togglingId === c.id ? (
+                                                    <svg className="w-2.5 h-2.5 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                                    </svg>
+                                                ) : c.isActive ? (
+                                                    <svg className="w-2.5 h-2.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg className="w-2.5 h-2.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                )}
+                                            </span>
+                                        </div>
+                                    </button>
                                 </td>
 
                                 <td className="px-5 py-3.5">
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => handleToggleStatus(c.id, c.isActive)}
-                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                                                c.isActive
-                                                    ? "bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200"
-                                                    : "bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
-                                            }`}
-                                        >
-                                            <span className={`w-1.5 h-1.5 rounded-full ${c.isActive ? "bg-yellow-500" : "bg-green-500"}`} />
-                                            {c.isActive ? "Deactivate" : "Activate"}
-                                        </button>
-
-                                        <button
-                                            onClick={() => handleDelete(c.id)}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all duration-200"
-                                        >
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            Delete
-                                        </button>
-                                    </div>
+                                    <button
+                                        onClick={() => handleDelete(c.id)}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all duration-200"
+                                    >
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        
+                                    </button>
                                 </td>
 
                             </tr>
