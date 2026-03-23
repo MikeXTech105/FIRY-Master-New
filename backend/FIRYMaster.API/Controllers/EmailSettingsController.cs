@@ -61,5 +61,19 @@ namespace FIRYMaster.API.Controllers
             return this.StatusCode((int)HttpStatusCode.OK, response);
         }
 
+        [HttpPost("UpdateEmailSettings")]
+        public async Task<IActionResult> UpdateEmailSettings([FromBody]EmailSettings request)
+        {
+            APIResponseDto response = new APIResponseDto();
+            try
+            {
+                response = await _emailSettingsService.UpdateEmailSettings(request);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
+            }
+            return this.StatusCode((int)HttpStatusCode.OK, response);
+        }
     }
 }

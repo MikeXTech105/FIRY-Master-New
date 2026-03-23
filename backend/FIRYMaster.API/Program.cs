@@ -1,4 +1,4 @@
-using FIRYMaster.API.Extensions;
+﻿using FIRYMaster.API.Extensions;
 using FIRYMaster.Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -70,13 +70,17 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseStaticFiles();
+app.UseDefaultFiles();   // serve index.html
+app.UseStaticFiles();    // serve JS, CSS
+
+// 👇 THIS IS THE KEY FIX
+app.MapFallbackToFile("index.html");
 
 app.UseCors("CorsPolicy");
 
 app.MapControllers();
 
-app.MapGet("/", context =>
+app.MapGet("/swagger", context =>
 {
     context.Response.Redirect("/swagger");
     return Task.CompletedTask;

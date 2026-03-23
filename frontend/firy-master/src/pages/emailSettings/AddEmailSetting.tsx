@@ -1,27 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { createEmailSetting } from "../../services/emailSettingsService";
+import { createEmailSetting, updateEmailSetting } from "../../services/emailSettingsService";
 
 type Props = {
   closeModal: () => void;
   refreshSettings: () => void;
+  editData?: any; // NEW
 };
 
-export default function AddEmailSettingModal({ closeModal, refreshSettings }: Props) {
+export default function AddEmailSettingModal({ closeModal, refreshSettings, editData }: Props) {
+
+  const isEdit = !!editData; // true hoy to Edit mode
 
   const [form, setForm] = useState({ key: "", value: "" });
   const [loading, setLoading] = useState(false);
+
+  // Edit mode: pre-fill karo
+  useEffect(() => {
+    if (editData) {
+      setForm({ key: editData.key, value: editData.value });
+    }
+  }, []);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
       setLoading(true);
-      await createEmailSetting(form);
-      toast.success("Added successfully");
+
+      if (isEdit) {
+        await updateEmailSetting({ id: editData.id, key: form.key, value: form.value });
+        toast.success("Updated successfully");
+      } else {
+        await createEmailSetting(form);
+        toast.success("Added successfully");
+      }
+
       refreshSettings();
       closeModal();
     } catch {
-      toast.error("Failed");
+      toast.error(isEdit ? "Update failed" : "Create failed");
     } finally {
       setLoading(false);
     }
@@ -41,15 +58,17 @@ export default function AddEmailSettingModal({ closeModal, refreshSettings }: Pr
               </svg>
             </div>
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Add Email Setting</h2>
-              <p className="text-xs text-gray-400">Configure a new email setting</p>
+              {/* Dynamic title */}
+              <h2 className="text-base font-semibold text-gray-900">
+                {isEdit ? "Edit Email Setting" : "Add Email Setting"}
+              </h2>
+              <p className="text-xs text-gray-400">
+                {isEdit ? "Update the email setting below" : "Configure a new email setting"}
+              </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={closeModal}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all duration-200"
-          >
+          <button type="button" onClick={closeModal}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all duration-200">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -84,18 +103,12 @@ export default function AddEmailSettingModal({ closeModal, refreshSettings }: Pr
 
           {/* Footer */}
           <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 transition-all duration-200"
-            >
+            <button type="button" onClick={closeModal}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 transition-all duration-200">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-sm shadow-blue-200"
-            >
+            <button type="submit" disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-sm shadow-blue-200">
               {loading ? (
                 <>
                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -109,7 +122,7 @@ export default function AddEmailSettingModal({ closeModal, refreshSettings }: Pr
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                   </svg>
-                  Save Setting
+                  {isEdit ? "Update Setting" : "Save Setting"}
                 </>
               )}
             </button>

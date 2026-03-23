@@ -34,6 +34,9 @@ namespace FIRYMaster.Infrastructure.DependencyInjection
             services.AddScoped<IEmailSettingsRepository, EmailSettingsRepository>();
 
             services.AddScoped<EmailSettingsService>();
+            services.AddScoped<IDashboardRepository, DashboardRepository>();
+
+            services.AddScoped<DashboardService>();
 
             return services;
         }

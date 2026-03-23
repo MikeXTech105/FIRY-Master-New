@@ -76,9 +76,10 @@ namespace FIRYMaster.API.Extensions
                         await con.ExecuteAsync(
                             @"UPDATE EmailQueue 
                       SET appSentAt = GETDATE(),
-                          appStatus = 2
+                          appStatus = 2,
+                          appMessage = @Message
                       WHERE appId = @Id",
-                            new { Id = email.appId }
+                            new { Id = email.appId, Message = emailsent.Item2 }
                         );
                     }
                     else
@@ -86,20 +87,22 @@ namespace FIRYMaster.API.Extensions
                         await con.ExecuteAsync(
                             @"UPDATE EmailQueue 
                       SET appSentAt = GETDATE(),
-                          appStatus = 3
+                          appStatus = 3,
+                          appMessage = @Message
                       WHERE appId = @Id",
-                            new { Id = email.appId }
+                            new { Id = email.appId, Message = emailsent.Item2 }
                         );
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     await con.ExecuteAsync(
                            @"UPDATE EmailQueue 
                       SET appSentAt = GETDATE(),
-                          appStatus = 3
+                          appStatus = 3,
+                          appMessage = @Message
                       WHERE appId = @Id",
-                           new { Id = email.appId }
+                           new { Id = email.appId, Message = ex.Message }
                        );
 
                     //  // 🔹 Retry count
@@ -192,7 +195,7 @@ namespace FIRYMaster.API.Extensions
             {
                 return new Tuple<bool, string>(false, ex.Message);
             }
-            return new Tuple<bool, string>(false, "Failed");
+            return new Tuple<bool, string>(true, "Success");
         }
     }
 }

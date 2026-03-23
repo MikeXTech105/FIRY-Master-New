@@ -63,10 +63,10 @@ export default function Emails() {
         return pages;
     };
 
-    const getRoleName = (roleId: number) => {
-        const role = roles.find((r: any) => r.id === roleId);
-        return role?.roleName || roleId;
-    };
+    // const getRoleName = (roleId: number) => {
+    //     const role = roles.find((r: any) => r.id === roleId);
+    //     return role?.roleName || roleId;
+    // };
 
     return (
         <DashboardLayout>

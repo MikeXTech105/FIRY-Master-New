@@ -9,6 +9,7 @@ namespace FIRYMaster.Application.Interfaces
     {
         Task<List<EmailSettings>> GetEamilSettings();
         Task<APIResponseDto> CreateEmailSettings(string Key, string Value);
+        Task<APIResponseDto> UpdateEmailSettings(EmailSettings request);
         Task<APIResponseDto> DeleteEmailSetting(int Id);
     }
 }

@@ -4,7 +4,6 @@ import { getRoles } from "../../services/roleService";
 import AddRoleModal from "../roles/AddRoleModal";
 import { deleteRole } from "../../services/roleService";
 import { toggleRoleStatus } from "../../services/roleService";
-import api from "../../services/api";
 import toast from "react-hot-toast";
 
 export default function Roles() {
@@ -155,7 +154,7 @@ export default function Roles() {
                                     </div>
                                 </td>
 
-                                <td className="px-5 py-3.5">
+                                {/* <td className="px-5 py-3.5">
                                     <button
                                         onClick={() => handleToggleStatus(role.id, role.isActive)}
                                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
@@ -167,6 +166,52 @@ export default function Roles() {
                                         <span className={`w-1.5 h-1.5 rounded-full ${role.isActive ? "bg-yellow-500" : "bg-green-500"}`} />
                                         {role.isActive ? "Deactivate" : "Activate"}
                                     </button>
+                                </td> */}
+                                <td className="px-5 py-3.5">
+                                    <button
+                                        onClick={() => handleToggleStatus(role.id, role.isActive)}
+                                        className="group relative flex items-center gap-2.5 cursor-pointer"
+                                        title={role.isActive ? "Click to Deactivate" : "Click to Activate"}
+                                    >
+                                        {/* Track */}
+                                        <div
+                                            className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out shadow-inner
+                ${role.isActive
+                                                    ? "bg-green-500 shadow-green-200"
+                                                    : "bg-red-400 shadow-red-100"
+                                                }`}
+                                        >
+                                            {/* Glow ring */}
+                                            <span
+                                                className={`absolute inset-0 rounded-full transition-all duration-300
+                    ${role.isActive
+                                                        ? "ring-2 ring-green-300 ring-offset-1 opacity-60"
+                                                        : "ring-2 ring-red-300 ring-offset-1 opacity-60"
+                                                    }`}
+                                            />
+
+                                            {/* Thumb */}
+                                            <span
+                                                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md
+                    transform transition-all duration-300 ease-in-out
+                    flex items-center justify-center
+                    ${role.isActive ? "translate-x-5" : "translate-x-0"}
+                    group-hover:scale-90`}
+                                            >
+                                                {role.isActive ? (
+                                                    <svg className="w-2.5 h-2.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg className="w-2.5 h-2.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                )}
+                                            </span>
+                                        </div>
+
+
+                                    </button>
                                 </td>
 
                                 <td className="px-5 py-3.5">
@@ -177,7 +222,7 @@ export default function Roles() {
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
-                                        Delete
+                                        
                                     </button>
                                 </td>
 

@@ -32,7 +32,7 @@ namespace FIRYMaster.API.Controllers
             return this.StatusCode((int)HttpStatusCode.OK, response);
         }
         [HttpPost("GetEmail")]
-        public async Task<IActionResult> GetEmail(GetEmailDto request)
+        public async Task<IActionResult> GetEmail(GetEmailDto request) 
         {
             GetEmailResponseDto response = new GetEmailResponseDto();
             try
