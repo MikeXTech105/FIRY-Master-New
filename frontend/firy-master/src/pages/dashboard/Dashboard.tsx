@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import { getDashboardStats } from "../../services/dashboardService";
 import type { DashboardStats } from "../../services/dashboardService";
