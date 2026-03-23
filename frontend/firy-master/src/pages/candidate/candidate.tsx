@@ -18,6 +18,7 @@ export default function Candidate() {
     const [resumeUrl, setResumeUrl] = useState<string | null>(null);
     const [showResumeModal, setShowResumeModal] = useState(false);
     const [togglingId, setTogglingId] = useState<number | null>(null);
+    const [editCandidate, setEditCandidate] = useState<any | null>(null);
 
     useEffect(() => {
         fetchCandidates();
@@ -206,19 +207,17 @@ export default function Candidate() {
                                     >
                                         {/* Track */}
                                         <div
-                                            className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out shadow-inner ${
-                                                c.isActive
-                                                    ? "bg-green-500 shadow-green-200"
-                                                    : "bg-red-400 shadow-red-100"
-                                            }`}
+                                            className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out shadow-inner ${c.isActive
+                                                ? "bg-green-500 shadow-green-200"
+                                                : "bg-red-400 shadow-red-100"
+                                                }`}
                                         >
                                             {/* Glow ring */}
                                             <span
-                                                className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                                                    c.isActive
-                                                        ? "ring-2 ring-green-300 ring-offset-1 opacity-60"
-                                                        : "ring-2 ring-red-300 ring-offset-1 opacity-60"
-                                                }`}
+                                                className={`absolute inset-0 rounded-full transition-all duration-300 ${c.isActive
+                                                    ? "ring-2 ring-green-300 ring-offset-1 opacity-60"
+                                                    : "ring-2 ring-red-300 ring-offset-1 opacity-60"
+                                                    }`}
                                             />
 
                                             {/* Thumb */}
@@ -247,8 +246,33 @@ export default function Candidate() {
                                         </div>
                                     </button>
                                 </td>
-
                                 <td className="px-5 py-3.5">
+                                    <div className="flex items-center gap-2">
+
+                                        {/* Edit Button */}
+                                        <button
+                                            onClick={() => setEditCandidate(c)}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-all duration-200"
+                                        >
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H8v-2.414a2 2 0 01.586-1.414z" />
+                                            </svg>
+                                            {/* Edit */}
+                                        </button>
+
+                                        {/* Delete Button */}
+                                        <button
+                                            onClick={() => handleDelete(c.id)}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all duration-200"
+                                        >
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+
+                                    </div>
+                                </td>
+                                {/* <td className="px-5 py-3.5">
                                     <button
                                         onClick={() => handleDelete(c.id)}
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all duration-200"
@@ -256,9 +280,9 @@ export default function Candidate() {
                                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
-                                        
+
                                     </button>
-                                </td>
+                                </td> */}
 
                             </tr>
                         ))}
@@ -268,10 +292,11 @@ export default function Candidate() {
             </div>
 
             {/* Add Candidate Modal */}
-            {showModal && (
+            {(showModal || editCandidate) && (
                 <AddCandidateModal
-                    closeModal={() => setShowModal(false)}
+                    closeModal={() => { setShowModal(false); setEditCandidate(null); }}
                     refreshCandidates={fetchCandidates}
+                    editData={editCandidate}  // <-- new prop
                 />
             )}
 

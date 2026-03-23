@@ -71,3 +71,34 @@ export const viewResume = async (resumeFilePath: string) => {
     responseType: "blob"
   });
 };
+export const updateCandidate = async (data: any) => {
+  const formData = new FormData();
+
+  formData.append("Id", data.id);
+  formData.append("Name", data.name || "");
+  formData.append("RoleId", data.roleId);
+  formData.append("PhoneNumber", data.phoneNumber || "");
+  formData.append("Email", data.email || "");
+  formData.append("AppPassword", data.appPassword || "");
+  formData.append("Subject", data.subject || "");
+  formData.append("Body", data.body || "");
+  formData.append("IsActive", String(data.isActive ?? true));
+
+  // Navu file upload thayel hoy to j ResumeFile send karo
+  if (data.resumeFile) {
+    formData.append("ResumeFile", data.resumeFile);
+  }
+
+  // ResumeFilePath HAMESHA send karo — juna path mate (navu file na hoy tyare)
+  formData.append("ResumeFilePath", data.resumeFilePath || "");
+
+  const response = await api.post(
+    "/Candidate/UpdateCandidate",
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" }
+    }
+  );
+
+  return response.data;
+};
