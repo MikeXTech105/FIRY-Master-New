@@ -2,6 +2,7 @@
 using FIRYMaster.Application.DTOs;
 using FIRYMaster.Application.Interfaces;
 using FIRYMaster.Infrastructure.Persistence.DbConnection;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -67,6 +68,26 @@ namespace FIRYMaster.Infrastructure.Persistence.Repositories
                 parameters.Add("@Id", ID);
                 parameters.Add("@IsActive", IsActive);
                 response = await connection.QueryFirstAsync<CandidateResponseDto>("sp_IsActiveCandidate", parameters, commandType: CommandType.StoredProcedure);
+            }
+            return response;
+        }
+        public async Task<APIResponseDto> UpdateCandidate(UpdateCandidateRequest request)
+        {
+            APIResponseDto response = new APIResponseDto();
+            using (var connection = _context.CreateConnection())
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@Id", request.Id);
+                parameters.Add("@Name", request.Name);
+                parameters.Add("@RoleId", request.RoleId);
+                parameters.Add("@PhoneNumber", request.PhoneNumber);
+                parameters.Add("@Email", request.Email);
+                parameters.Add("@AppPassword", request.AppPassword);
+                parameters.Add("@Subject", request.Subject);
+                parameters.Add("@Body", request.Body);
+                parameters.Add("@ResumeFilePath", request.ResumeFilePath);
+                parameters.Add("@IsActive", request.IsActive);
+                response = await connection.QueryFirstAsync<APIResponseDto>("sp_UpdateCandidate", parameters, commandType: CommandType.StoredProcedure);
             }
             return response;
         }

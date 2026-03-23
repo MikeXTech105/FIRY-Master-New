@@ -30,5 +30,9 @@ namespace FIRYMaster.Application.Services
         {
             return await _candidateRepository.IsActiveCandidate(ID,IsActive);
         }
+        public async Task<APIResponseDto> UpdateCandidate(UpdateCandidateRequest request)
+        {
+            return await _candidateRepository.UpdateCandidate(request);
+        }
     }
 }

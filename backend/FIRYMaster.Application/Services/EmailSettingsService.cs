@@ -21,6 +21,10 @@ namespace FIRYMaster.Application.Services
         {
             return await _emailSettingsRepository.CreateEmailSettings(Key, Value);
         }
+        public async Task<APIResponseDto> UpdateEmailSettings(EmailSettings request)
+        {
+            return await _emailSettingsRepository.UpdateEmailSettings(request);
+        }
         public async Task<APIResponseDto> DeleteEmailSetting(int Id)
         {
             return await _emailSettingsRepository.DeleteEmailSetting(Id);

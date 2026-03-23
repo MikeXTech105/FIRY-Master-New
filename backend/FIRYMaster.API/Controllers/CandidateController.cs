@@ -2,8 +2,10 @@
 using FIRYMaster.Application.DTOs;
 using FIRYMaster.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Bcpg.Sig;
 using System.Net;
 using System.Reflection;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace FIRYMaster.API.Controllers
 {
@@ -104,6 +106,7 @@ namespace FIRYMaster.API.Controllers
             }
             return this.StatusCode((int)HttpStatusCode.OK, response);
         }
+
         [HttpGet("view-resume")]
         public IActionResult ViewResume(string resumeFilePath)
         {
@@ -124,6 +127,50 @@ namespace FIRYMaster.API.Controllers
             var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
 
             return File(stream, "application/pdf");
+        }
+
+        [HttpPost("UpdateCandidate")]
+        public async Task<IActionResult> UpdateCandidate([FromForm] UpdateCandidateRequest request)
+        {
+            APIResponseDto response = new APIResponseDto();
+            try
+            {
+                if(request.ResumeFile != null)
+                {
+                    string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Resumes");
+
+                    if (!Directory.Exists(folderPath))
+                        Directory.CreateDirectory(folderPath);
+
+                    string originalFileName = Path.GetFileNameWithoutExtension(request.ResumeFile.FileName);
+                    string extension = Path.GetExtension(request.ResumeFile.FileName);
+
+                    string fileName = request.ResumeFile.FileName;
+                    string filePath = Path.Combine(folderPath, fileName);
+
+                    int count = 1;
+
+                    while (System.IO.File.Exists(filePath))
+                    {
+                        fileName = $"{originalFileName}({count}){extension}";
+                        filePath = Path.Combine(folderPath, fileName);
+                        count++;
+                    }
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await request.ResumeFile.CopyToAsync(stream);
+                    }
+
+                    request.ResumeFilePath = "/Resumes/" + fileName;
+                }
+                response = await _candidateService.UpdateCandidate(request);
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
+            }
+            return this.StatusCode((int)HttpStatusCode.OK, response);
         }
     }
 }

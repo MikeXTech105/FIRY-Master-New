@@ -38,6 +38,19 @@ namespace FIRYMaster.Infrastructure.Persistence.Repositories
             }
             return response;
         }
+        public async Task<APIResponseDto> UpdateEmailSettings(EmailSettings request)
+        {
+            APIResponseDto response = new APIResponseDto();
+            using (var connection = _context.CreateConnection())
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@Id", request.Id);
+                parameters.Add("@Key", request.Key);
+                parameters.Add("@Value", request.Value);
+                response = await connection.QueryFirstAsync<APIResponseDto>("sp_UpdateEmailSettings", parameters, commandType: CommandType.StoredProcedure);
+            }
+            return response;
+        }
         public async Task<APIResponseDto> DeleteEmailSetting(int Id)
         {
             APIResponseDto response = new APIResponseDto();

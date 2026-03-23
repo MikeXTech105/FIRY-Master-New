@@ -11,5 +11,7 @@ namespace FIRYMaster.Application.Interfaces
         Task<List<CandidateRequestDto>> GetCandidate();
         Task<CandidateResponseDto> DeleteCandidate(int ID);
         Task<CandidateResponseDto> IsActiveCandidate(int ID, bool IsActive);
+
+        Task<APIResponseDto> UpdateCandidate(UpdateCandidateRequest request);
     }
 }
