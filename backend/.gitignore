@@ -1,0 +1,78 @@
+# Build folders
+
+bin/
+obj/
+
+# User-specific files
+
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Visual Studio cache
+
+.vs/
+
+# Rider
+
+.idea/
+
+# Logs
+
+*.log
+
+# Environment files
+
+.env
+.env.*
+
+# OS files
+
+.DS_Store
+Thumbs.db
+
+# Publish output
+
+publish/
+
+# IIS / Local hosting
+
+*.dbmdl
+
+# NuGet
+
+packages/
+*.nupkg
+
+# Node (if React/Angular inside project)
+
+node_modules/
+
+# Coverage / Test results
+
+TestResults/
+coverage/
+
+# Resharper
+
+_ReSharper*/
+*.DotSettings.user
+
+# Visual Studio Code
+
+.vscode/
+
+# Backup files
+
+*.bak
+*.tmp
+*.swp
+
+# Secrets
+
+secrets.json
+
+# EF migrations build artifacts
+
+Migrations/*.Designer.cs

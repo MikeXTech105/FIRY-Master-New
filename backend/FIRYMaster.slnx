@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="FIRYMaster.API/FIRYMaster.API.csproj" Id="d9d829ee-e620-42f0-aa75-e3effb5a968c" />
+  <Project Path="FIRYMaster.Application/FIRYMaster.Application.csproj" Id="0b2143b3-a0ad-41c3-85a3-6ffc9253efb2" />
+  <Project Path="FIRYMaster.Domain/FIRYMaster.Domain.csproj" Id="62263cd2-9e64-4b67-8a9d-ae1ebe588fb0" />
+  <Project Path="FIRYMaster.Infrastructure/FIRYMaster.Infrastructure.csproj" Id="4752224b-d394-45e0-9f59-2e60bcefdc06" />
+</Solution>
