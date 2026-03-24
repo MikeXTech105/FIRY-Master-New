@@ -1,44 +1,46 @@
-export default function Header() {
+import type { ReactNode } from "react";
+
+type HeaderProps = {
+  title: string;
+  subtitle?: string;
+  actions?: ReactNode;
+};
+
+export default function Header({ title, subtitle, actions }: HeaderProps) {
+  const today = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date());
+
   return (
-    <div className="flex items-center justify-between bg-white border-b border-gray-100 px-8 py-4 shadow-sm">
-
-      <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-        Dashboard
-      </h1>
-
-      <div className="flex items-center gap-3">
-
-        <button className="relative flex items-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-900 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 border border-gray-200 hover:border-gray-300">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-            />
-          </svg>
-          Notifications
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
-        </button>
-
-        <div className="flex items-center gap-3 pl-3 border-l border-gray-200">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
-            <span className="text-white text-sm font-semibold">A</span>
+    <header className="border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8 xl:flex-row xl:items-center xl:justify-between">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
+            Talent operations suite
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-gray-900 leading-tight">Admin</span>
-            <span className="text-xs text-gray-400 leading-tight">Administrator</span>
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight text-white">{title}</h1>
+            {subtitle ? <p className="mt-2 max-w-2xl text-sm text-slate-300">{subtitle}</p> : null}
           </div>
         </div>
 
-      </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {actions}
 
-    </div>
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 shadow-2xl shadow-slate-950/20">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 text-sm font-bold text-white shadow-lg shadow-cyan-500/20">
+              FM
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Admin Workspace</p>
+              <p className="text-xs text-slate-400">{today}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }

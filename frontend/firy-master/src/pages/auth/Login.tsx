@@ -1,6 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { loginUser } from "../../services/authService";
-import { useEffect, useRef, useState } from "react";
 
 type LoginForm = {
   email: string;
@@ -32,199 +32,219 @@ export default function Login() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const particles: {
-      x: number; y: number; z: number;
-      vx: number; vy: number; vz: number;
-      size: number;
-    }[] = [];
-
-    for (let i = 0; i < 120; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        z: Math.random() * 800,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        vz: Math.random() * 1.5 + 0.2,
-        size: Math.random() * 2 + 1,
-      });
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
     }
 
-    let animId: number;
-
-    const draw = () => {
-      ctx.fillStyle = "rgba(6, 11, 28, 0.25)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
-
-      particles.forEach((p, i) => {
-        p.z -= p.vz;
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (p.z <= 0) p.z = 800;
-        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-
-        const scale = 800 / (800 + p.z);
-        const sx = (p.x - cx) * scale + cx;
-        const sy = (p.y - cy) * scale + cy;
-        const r = p.size * scale;
-        const alpha = scale * 0.9;
-
-        ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(99, 179, 237, ${alpha})`;
-        ctx.fill();
-
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const scale2 = 800 / (800 + p2.z);
-          const sx2 = (p2.x - cx) * scale2 + cx;
-          const sy2 = (p2.y - cy) * scale2 + cy;
-          const dist = Math.hypot(sx - sx2, sy - sy2);
-
-          if (dist < 100) {
-            ctx.beginPath();
-            ctx.moveTo(sx, sy);
-            ctx.lineTo(sx2, sy2);
-            ctx.strokeStyle = `rgba(99, 179, 237, ${(1 - dist / 100) * 0.15})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-      });
-
-      animId = requestAnimationFrame(draw);
-    };
-
-    draw();
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return;
+    }
 
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
+
+    resize();
+
+    const particles = Array.from({ length: 90 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      z: Math.random() * 800,
+      vx: (Math.random() - 0.5) * 0.28,
+      vy: (Math.random() - 0.5) * 0.28,
+      vz: Math.random() * 1.2 + 0.2,
+      size: Math.random() * 2.2 + 0.8,
+    }));
+
+    let animationFrame = 0;
+
+    const draw = () => {
+      context.fillStyle = "rgba(2, 6, 23, 0.32)";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      particles.forEach((particle, index) => {
+        particle.z -= particle.vz;
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+
+        if (particle.z <= 0) particle.z = 800;
+        if (particle.x < 0 || particle.x > canvas.width) particle.vx *= -1;
+        if (particle.y < 0 || particle.y > canvas.height) particle.vy *= -1;
+
+        const scale = 800 / (800 + particle.z);
+        const scaledX = (particle.x - centerX) * scale + centerX;
+        const scaledY = (particle.y - centerY) * scale + centerY;
+        const radius = particle.size * scale;
+
+        context.beginPath();
+        context.arc(scaledX, scaledY, radius, 0, Math.PI * 2);
+        context.fillStyle = `rgba(56, 189, 248, ${scale * 0.95})`;
+        context.fill();
+
+        for (let nextIndex = index + 1; nextIndex < particles.length; nextIndex += 1) {
+          const next = particles[nextIndex];
+          const nextScale = 800 / (800 + next.z);
+          const nextX = (next.x - centerX) * nextScale + centerX;
+          const nextY = (next.y - centerY) * nextScale + centerY;
+          const distance = Math.hypot(scaledX - nextX, scaledY - nextY);
+
+          if (distance < 110) {
+            context.beginPath();
+            context.moveTo(scaledX, scaledY);
+            context.lineTo(nextX, nextY);
+            context.strokeStyle = `rgba(99, 102, 241, ${(1 - distance / 110) * 0.18})`;
+            context.lineWidth = 0.6;
+            context.stroke();
+          }
+        }
+      });
+
+      animationFrame = requestAnimationFrame(draw);
+    };
+
+    draw();
     window.addEventListener("resize", resize);
 
     return () => {
-      cancelAnimationFrame(animId);
+      cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resize);
     };
   }, []);
 
+  const highlights = [
+    "Unified hiring dashboard and communication workflows",
+    "Quick access to role management and outreach operations",
+    "Modern analytics-first interface for day-to-day recruiting",
+  ];
+
   return (
-    <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-[#060b1c]">
+    <div className="relative flex min-h-screen overflow-hidden bg-slate-950">
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.18),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(99,102,241,0.22),transparent_35%)]" />
 
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
-
-      <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-600 opacity-10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600 opacity-10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-
-          {/* Logo */}
-          <div className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 shadow-lg shadow-blue-900/50 mb-4">
-              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+      <div className="relative z-10 grid min-h-screen w-full lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="hidden flex-col justify-between px-8 py-10 lg:flex xl:px-16">
+          <div className="max-w-xl space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200">
+              FiryMaster platform
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">FiryMaster</h1>
-            <p className="text-gray-400 text-sm mt-1">Sign in to continue</p>
+            <div className="space-y-4">
+              <h1 className="text-5xl font-semibold leading-tight tracking-tight text-white">
+                Redefined hiring operations for fast-moving teams.
+              </h1>
+              <p className="max-w-lg text-lg leading-8 text-slate-300">
+                Manage candidates, permissions, email campaigns, and configuration from one focused workspace built for recruiters and admins.
+              </p>
+            </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-
-            {/* Email */}
-            <div>
-              <label className="text-sm font-medium text-gray-300 block mb-1.5">Email</label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                {...register("email", { required: "Email is required" })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-              />
-              {errors.email && (
-                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="text-sm font-medium text-gray-300 block mb-1.5">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  {...register("password", { required: "Password is required" })}
-                  className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors duration-200"
-                >
-                  {showPassword ? (
-                    // Eye Off Icon
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  ) : (
-                    // Eye Icon
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </button>
+          <div className="grid gap-4 md:grid-cols-3">
+            {highlights.map((item, index) => (
+              <div key={item} className="glass-panel p-5">
+                <p className="text-sm font-semibold text-cyan-200">0{index + 1}</p>
+                <p className="mt-3 text-sm leading-6 text-slate-300">{item}</p>
               </div>
-              {errors.password && (
-                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            ))}
+          </div>
+        </section>
+
+        <section className="flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+          <div className="w-full max-w-xl rounded-[32px] border border-white/10 bg-slate-950/70 p-6 shadow-2xl shadow-slate-950/60 backdrop-blur-2xl sm:p-8">
+            <div className="mb-8 flex items-start justify-between gap-4">
+              <div>
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 shadow-lg shadow-cyan-500/20">
+                  <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 2.75 4.75 13h5.5L11 21.25 19.25 11H13V2.75Z" />
                   </svg>
-                  {errors.password.message}
-                </p>
-              )}
+                </div>
+                <h2 className="mt-5 text-3xl font-semibold tracking-tight text-white">Welcome back</h2>
+                <p className="mt-2 text-sm text-slate-400">Sign in to access your redesigned recruitment workspace.</p>
+              </div>
+              <div className="hidden rounded-2xl border border-emerald-400/20 bg-emerald-500/10 px-3 py-2 text-right sm:block">
+                <p className="text-xs uppercase tracking-[0.2em] text-emerald-200/70">Status</p>
+                <p className="mt-1 text-sm font-semibold text-emerald-200">Systems ready</p>
+              </div>
             </div>
 
-            {/* Forgot Password */}
-            <div className="text-right">
-              <a href="#" className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200">
-                Forgot Password?
-              </a>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-300">Work email</label>
+                <input
+                  type="email"
+                  placeholder="you@company.com"
+                  {...register("email", { required: "Email is required" })}
+                  className="input-shell"
+                />
+                {errors.email ? <p className="mt-2 text-xs text-rose-300">{errors.email.message}</p> : null}
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-slate-300">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    {...register("password", { required: "Password is required" })}
+                    className="input-shell pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((value) => !value)}
+                    className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition hover:bg-white/5 hover:text-slate-200"
+                  >
+                    {showPassword ? (
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m3 3 18 18M10.477 10.479A3 3 0 0 0 13.5 13.5m4.422 4.424A10.452 10.452 0 0 1 12 19.5c-4.592 0-8.49-2.95-9.945-7.064a10.453 10.453 0 0 1 3.278-4.568m3.548-1.956A10.45 10.45 0 0 1 12 4.5c4.592 0 8.49 2.95 9.945 7.064a10.459 10.459 0 0 1-1.82 3.043M14.12 14.122 9.88 9.88" />
+                      </svg>
+                    ) : (
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1 1 0 0 1 0-.644C3.423 7.51 7.36 4.5 12 4.5s8.577 3.01 9.964 7.178a1 1 0 0 1 0 .644C20.577 16.49 16.64 19.5 12 19.5S3.423 16.49 2.036 12.322Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                {errors.password ? <p className="mt-2 text-xs text-rose-300">{errors.password.message}</p> : null}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <label className="inline-flex items-center gap-2 text-slate-400">
+                  <input type="checkbox" className="h-4 w-4 rounded border-white/10 bg-slate-900 text-cyan-400 focus:ring-cyan-400/30" />
+                  Keep me signed in
+                </label>
+                <a href="#" className="font-medium text-cyan-300 transition hover:text-cyan-200">
+                  Forgot password?
+                </a>
+              </div>
+
+              <button type="submit" className="btn-primary w-full py-3.5 text-base">
+                Sign in to dashboard
+              </button>
+            </form>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+                <p className="text-2xl font-semibold text-white">24/7</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">access</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+                <p className="text-2xl font-semibold text-white">All pages</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">refreshed UI</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+                <p className="text-2xl font-semibold text-white">1 hub</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-400">for operations</p>
+              </div>
             </div>
-
-            {/* Login Button */}
-            <button
-              type="submit"
-              className="w-full py-3 font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-all duration-200 shadow-lg shadow-blue-900/40 hover:shadow-blue-700/50 text-sm tracking-wide"
-            >
-              Sign In
-            </button>
-
-          </form>
-        </div>
-
-        <p className="text-center text-gray-600 text-xs mt-6">
-          © 2025 FiryMaster. All rights reserved.
-        </p>
+          </div>
+        </section>
       </div>
-
     </div>
   );
 }

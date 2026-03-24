@@ -1,53 +1,54 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import type { Candidate, Role } from "../../types";
 import toast from "react-hot-toast";
 import { createCandidate } from "../../services/candidateService";
 import { getRoles } from "../../services/roleService";
 
-export default function AddCandidateModal({ closeModal, refreshCandidates }: any) {
+type AddCandidateModalProps = {
+  closeModal: () => void;
+  refreshCandidates: () => void;
+};
 
-  const [form, setForm] = useState<any>({});
-  const [file, setFile] = useState<any>(null);
+type CandidateFormState = Partial<Omit<Candidate, "id" | "isActive" | "resumeFilePath">>;
+
+export default function AddCandidateModal({ closeModal, refreshCandidates }: AddCandidateModalProps) {
+  const [form, setForm] = useState<CandidateFormState>({});
+  const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRole, setSelectedRole] = useState("");
 
   useEffect(() => {
-    console.log("Component mounted");
     fetchRoles();
   }, []);
 
-  // const fetchRoles = async () => {
-  //   try {
-  //     const res = await getRoles();
-  //     setRoles(res?.data?.data || res?.data || []);
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.error("Failed to load roles");
-  //   }
-  // };
-
   const fetchRoles = async () => {
     try {
-      console.log("🔥 calling API...");
       const res = await getRoles();
       setRoles(res);
     } catch (err) {
       console.error(err);
+      toast.error("Failed to load roles");
     }
   };
-  const handleChange = (e: any) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     try {
       setLoading(true);
-      // await createCandidate({ ...form, resumeFile: file });
       await createCandidate({
-        ...form,
+        name: form.name ?? "",
+        phoneNumber: form.phoneNumber ?? "",
+        email: form.email ?? "",
+        appPassword: form.appPassword ?? "",
+        subject: form.subject ?? "",
+        body: form.body ?? "",
         roleId: Number(selectedRole),
-        resumeFile: file
+        resumeFile: file,
       });
       toast.success("Candidate created");
       refreshCandidates();
@@ -58,191 +59,89 @@ export default function AddCandidateModal({ closeModal, refreshCandidates }: any
       setLoading(false);
     }
   };
-  // console.log("API RESPONSE 👉", res);
+
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50">
-
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
-
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
-              <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Add Candidate</h2>
-              <p className="text-xs text-gray-400">Fill in the candidate details below</p>
-            </div>
+    <div className="modal-backdrop">
+      <div className="modal-card max-w-3xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-5">
+          <div>
+            <p className="text-sm uppercase tracking-[0.24em] text-cyan-200/70">Candidate intake</p>
+            <h2 className="mt-2 text-xl font-semibold text-white">Add candidate</h2>
           </div>
-          <button
-            type="button"
-            onClick={closeModal}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all duration-200"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button type="button" onClick={closeModal} className="btn-secondary !px-3 !py-2 text-xs">
+            Close
           </button>
         </div>
 
-        {/* Modal Body */}
         <form onSubmit={handleSubmit}>
-          <div className="px-6 py-5 space-y-4 max-h-[65vh] overflow-y-auto">
+          <div className="grid max-h-[68vh] gap-5 overflow-y-auto px-6 py-6 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">Full name</label>
+              <input name="name" placeholder="e.g. John Doe" onChange={handleChange} className="input-shell" />
+            </div>
 
-            {/* Row 1 - Name & Role ID */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-gray-600 block mb-1.5">Full Name</label>
-                <input
-                  name="name"
-                  placeholder="e.g. John Doe"
-                  onChange={handleChange}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
-              </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">Role</label>
+              <select value={selectedRole} onChange={(event) => setSelectedRole(event.target.value)} className="select-shell">
+                <option value="">Select role</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.roleName}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              <div>
-                <label className="text-xs font-medium text-gray-600 block mb-1.5">Role ID</label>
-                <div className="relative">
-                  <select
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white appearance-none cursor-pointer pr-10"
-                  >
-                    <option value="">Select Role</option>
-                    {roles?.map((role: any) => (
-                      <option key={role.id} value={role.id}>
-                        {role.roleName}
-                      </option>
-                    ))}
-                  </select>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">Phone number</label>
+              <input name="phoneNumber" placeholder="e.g. 9876543210" onChange={handleChange} className="input-shell" />
+            </div>
 
-                  {/* Custom Arrow */}
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">Email</label>
+              <input name="email" placeholder="e.g. john@email.com" onChange={handleChange} className="input-shell" />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">App password</label>
+              <input name="appPassword" placeholder="App password" onChange={handleChange} className="input-shell" />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-300">Subject</label>
+              <input name="subject" placeholder="Email subject" onChange={handleChange} className="input-shell" />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium text-slate-300">Body</label>
+              <textarea name="body" placeholder="Email body content..." onChange={handleChange} rows={4} className="input-shell resize-none" />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium text-slate-300">Resume</label>
+              <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-dashed border-white/15 bg-white/5 px-4 py-4 transition hover:border-cyan-400/40 hover:bg-cyan-400/5">
+                <div>
+                  <p className="font-medium text-white">Upload PDF resume</p>
+                  <p className="mt-1 text-sm text-slate-400">{file ? file.name : "Choose a file to attach to this profile."}</p>
                 </div>
-              </div>
-            </div>
-
-            {/* Row 2 - Phone & Email */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-gray-600 block mb-1.5">Phone Number</label>
-                <input
-                  name="phoneNumber"
-                  placeholder="e.g. 9876543210"
-                  onChange={handleChange}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-600 block mb-1.5">Email</label>
-                <input
-                  name="email"
-                  placeholder="e.g. john@email.com"
-                  onChange={handleChange}
-                  className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
-              </div>
-            </div>
-
-            {/* App Password */}
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1.5">App Password</label>
-              <input
-                name="appPassword"
-                placeholder="App password"
-                onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              />
-            </div>
-
-            {/* Subject */}
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1.5">Subject</label>
-              <input
-                name="subject"
-                placeholder="Email subject"
-                onChange={handleChange}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              />
-            </div>
-
-            {/* Body */}
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1.5">Body</label>
-              <textarea
-                name="body"
-                placeholder="Email body content..."
-                onChange={handleChange}
-                rows={3}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
-              />
-            </div>
-
-            {/* Resume Upload */}
-            <div>
-              <label className="text-xs font-medium text-gray-600 block mb-1.5">Resume</label>
-              <label className="flex items-center gap-3 w-full px-3 py-2.5 border border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-200">
-                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span className="text-sm text-gray-400">
-                  {file ? (
-                    <span className="text-blue-600 font-medium">{file.name}</span>
-                  ) : (
-                    "Click to upload resume (PDF)"
-                  )}
-                </span>
+                <span className="btn-secondary !px-3 !py-2 text-xs">Browse</span>
                 <input
                   type="file"
                   className="hidden"
-                  onChange={(e: any) => setFile(e.target.files[0])}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => setFile(event.target.files?.[0] ?? null)}
                 />
               </label>
             </div>
-
           </div>
 
-          {/* Modal Footer */}
-          <div className="flex justify-end gap-2 px-6 py-4 bg-gray-50 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-100 transition-all duration-200"
-            >
+          <div className="flex justify-end gap-3 border-t border-white/10 bg-white/[0.03] px-6 py-5">
+            <button type="button" onClick={closeModal} className="btn-secondary">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-sm shadow-blue-200"
-            >
-              {loading ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  Save Candidate
-                </>
-              )}
+            <button type="submit" disabled={loading} className="btn-primary">
+              {loading ? "Saving..." : "Save candidate"}
             </button>
           </div>
-
         </form>
       </div>
     </div>
