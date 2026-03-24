@@ -1,11 +1,11 @@
-﻿using FIRYMaster.Application.DTOs;
 using FIRYMaster.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace FIRYMaster.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class RoleController : ControllerBase
     {
@@ -17,64 +17,31 @@ namespace FIRYMaster.API.Controllers
         }
 
         [HttpPost("CreateRole")]
-        public async Task<IActionResult> CreateRole(string RoleName)
+        public async Task<IActionResult> CreateRole([FromQuery] string roleName)
         {
-            RoleResponseDto response = new RoleResponseDto();
-            try
-            {
-                response = await _roleService.CreateRole(RoleName);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _roleService.CreateRole(roleName);
+            return Ok(response);
         }
 
         [HttpGet("GetRoles")]
         public async Task<IActionResult> GetRoles()
         {
-            List<RoleRes> lstRoles = new List<RoleRes>();
-            try
-            {
-                lstRoles = await _roleService.GetRoles();
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, lstRoles);
+            var roles = await _roleService.GetRoles();
+            return Ok(roles);
         }
 
         [HttpPost("DeleteRole")]
-        public async Task<IActionResult> DeleteRole(int ID)
+        public async Task<IActionResult> DeleteRole([FromQuery] int id)
         {
-            RoleResponseDto response = new RoleResponseDto();
-            try
-            {
-                response = await _roleService.DeleteRole(ID);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _roleService.DeleteRole(id);
+            return Ok(response);
         }
 
         [HttpPost("ActiveRole")]
-        public async Task<IActionResult> ActiveRole(int ID, bool IsActive)
+        public async Task<IActionResult> ActiveRole([FromQuery] int id, [FromQuery] bool isActive)
         {
-            RoleResponseDto response = new RoleResponseDto();
-            try
-            {
-                response = await _roleService.ActiveRole(ID, IsActive);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _roleService.ActiveRole(id, isActive);
+            return Ok(response);
         }
     }
 }

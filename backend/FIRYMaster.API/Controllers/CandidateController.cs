@@ -1,176 +1,86 @@
-﻿using Azure;
+using FIRYMaster.API.Services;
 using FIRYMaster.Application.DTOs;
 using FIRYMaster.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Org.BouncyCastle.Bcpg.Sig;
-using System.Net;
-using System.Reflection;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 namespace FIRYMaster.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class CandidateController : ControllerBase
-    { 
+    {
         private readonly CandidateService _candidateService;
-        public CandidateController(CandidateService candidateService)
+        private readonly IResumeStorageService _resumeStorageService;
+
+        public CandidateController(CandidateService candidateService, IResumeStorageService resumeStorageService)
         {
             _candidateService = candidateService;
+            _resumeStorageService = resumeStorageService;
         }
 
         [HttpPost("CreateCandidate")]
-        public async Task<IActionResult> CreateCandidate([FromForm] CandidateRequestDto model)
+        [RequestSizeLimit(20 * 1024 * 1024)]
+        public async Task<IActionResult> CreateCandidate([FromForm] CandidateRequestDto model, CancellationToken cancellationToken)
         {
-            CandidateResponseDto response = new CandidateResponseDto();
-            try
-            {
-                string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Resumes");
-
-                if (!Directory.Exists(folderPath))
-                    Directory.CreateDirectory(folderPath);
-
-                string originalFileName = Path.GetFileNameWithoutExtension(model.ResumeFile.FileName);     
-                string extension = Path.GetExtension(model.ResumeFile.FileName);
-
-                string fileName = model.ResumeFile.FileName;
-                string filePath = Path.Combine(folderPath, fileName);
-
-                int count = 1;
-
-                while (System.IO.File.Exists(filePath))
-                {
-                    fileName = $"{originalFileName}({count}){extension}";
-                    filePath = Path.Combine(folderPath, fileName);
-                    count++;
-                }
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.ResumeFile.CopyToAsync(stream);
-                }
-
-                model.ResumeFilePath = "/Resumes/" + fileName;
-
-                response = await _candidateService.CreateCandidate(model);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            model.ResumeFilePath = await _resumeStorageService.SaveAsync(model.ResumeFile, cancellationToken);
+            var response = await _candidateService.CreateCandidate(model);
+            return Ok(response);
         }
 
         [HttpGet("GetCandidate")]
         public async Task<IActionResult> GetCandidate()
         {
-            List<CandidateRequestDto> response = new List<CandidateRequestDto>();
-            try
-            {
-                response = await _candidateService.GetCandidate();
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _candidateService.GetCandidate();
+            return Ok(response);
         }
 
         [HttpPost("DeleteCandidate")]
-        public async Task<IActionResult> DeleteCandidate(int ID)
+        public async Task<IActionResult> DeleteCandidate([FromQuery] int id)
         {
-            CandidateResponseDto response = new CandidateResponseDto();
-            try
-            {
-                response = await _candidateService.DeleteCandidate(ID);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _candidateService.DeleteCandidate(id);
+            return Ok(response);
         }
 
         [HttpPost("IsActiveCandidate")]
-        public async Task<IActionResult> IsActiveCandidate(int ID, bool IsActive)
+        public async Task<IActionResult> IsActiveCandidate([FromQuery] int id, [FromQuery] bool isActive)
         {
-            CandidateResponseDto response = new CandidateResponseDto();
-            try
-            {
-                response = await _candidateService.IsActiveCandidate(ID, IsActive);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _candidateService.IsActiveCandidate(id, isActive);
+            return Ok(response);
         }
 
         [HttpGet("view-resume")]
-        public IActionResult ViewResume(string resumeFilePath)
+        public IActionResult ViewResume([FromQuery] string resumeFilePath)
         {
-            if (string.IsNullOrEmpty(resumeFilePath))
+            if (string.IsNullOrWhiteSpace(resumeFilePath))
+            {
                 return BadRequest("File path required");
+            }
 
             var fileName = Path.GetFileName(resumeFilePath);
-
-            var fullPath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "Resumes",
-                fileName
-            );
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "Resumes", fileName);
 
             if (!System.IO.File.Exists(fullPath))
+            {
                 return NotFound();
+            }
 
-            var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read);
-
+            var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
             return File(stream, "application/pdf");
         }
 
         [HttpPost("UpdateCandidate")]
-        public async Task<IActionResult> UpdateCandidate([FromForm] UpdateCandidateRequest request)
+        [RequestSizeLimit(20 * 1024 * 1024)]
+        public async Task<IActionResult> UpdateCandidate([FromForm] UpdateCandidateRequest request, CancellationToken cancellationToken)
         {
-            APIResponseDto response = new APIResponseDto();
-            try
+            if (request.ResumeFile is not null)
             {
-                if(request.ResumeFile != null)
-                {
-                    string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Resumes");
-
-                    if (!Directory.Exists(folderPath))
-                        Directory.CreateDirectory(folderPath);
-
-                    string originalFileName = Path.GetFileNameWithoutExtension(request.ResumeFile.FileName);
-                    string extension = Path.GetExtension(request.ResumeFile.FileName);
-
-                    string fileName = request.ResumeFile.FileName;
-                    string filePath = Path.Combine(folderPath, fileName);
-
-                    int count = 1;
-
-                    while (System.IO.File.Exists(filePath))
-                    {
-                        fileName = $"{originalFileName}({count}){extension}";
-                        filePath = Path.Combine(folderPath, fileName);
-                        count++;
-                    }
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await request.ResumeFile.CopyToAsync(stream);
-                    }
-
-                    request.ResumeFilePath = "/Resumes/" + fileName;
-                }
-                response = await _candidateService.UpdateCandidate(request);
+                request.ResumeFilePath = await _resumeStorageService.SaveAsync(request.ResumeFile, cancellationToken);
             }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+
+            var response = await _candidateService.UpdateCandidate(request);
+            return Ok(response);
         }
     }
 }
