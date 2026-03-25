@@ -1,12 +1,13 @@
-﻿using FIRYMaster.Application.DTOs;
-using FIRYMaster.Application.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
+using FIRYMaster.API.Configuration;
+using FIRYMaster.Application.DTOs;
+using FIRYMaster.Application.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace FIRYMaster.API.Controllers
 {
@@ -15,61 +16,53 @@ namespace FIRYMaster.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
-        private readonly IConfiguration _configuration; 
+        private readonly JwtOptions _jwtOptions;
 
-        public AuthController(AuthService authService, IConfiguration configuration)
+        public AuthController(AuthService authService, IOptions<JwtOptions> jwtOptions)
         {
             _authService = authService;
-            _configuration = configuration;
+            _jwtOptions = jwtOptions.Value;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequestDto request)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
-            LoginResponseDto response = new LoginResponseDto();
-            try
+            var response = await _authService.Login(request);
+
+            if (response.StatusCode == 1)
             {
-                response = await _authService.Login(request);
-                response.Token = GenerateTokenJWT(request.Email);
+                response.Token = GenerateTokenJwt(request.Email);
             }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+
+            return Ok(response);
         }
+
+        [AllowAnonymous]
         [HttpPost("CreateUser")]
-        public async Task<IActionResult> CreateUser(UserRequest request)
+        public async Task<IActionResult> CreateUser([FromBody] UserRequest request)
         {
-            APIResponseDto response = new APIResponseDto();
-            try
-            {
-                response = await _authService.CreateUser(request);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _authService.CreateUser(request);
+            return Ok(response);
         }
 
-        private string GenerateTokenJWT(string email)
+        private string GenerateTokenJwt(string email)
         {
-            var jwtSettings = _configuration.GetSection("Jwt");
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Email, email),
+                new Claim(JwtRegisteredClaimNames.Sub, email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
 
-            var claims = new[] { new Claim(ClaimTypes.Email, email) };
-
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["Key"])
-            );
-
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
+                issuer: _jwtOptions.Issuer,
+                audience: _jwtOptions.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(60),
+                expires: DateTime.UtcNow.AddMinutes(_jwtOptions.DurationInMinutes),
                 signingCredentials: creds
             );
 
