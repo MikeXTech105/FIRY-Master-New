@@ -24,7 +24,7 @@ namespace FIRYMaster.API.Controllers
             return Ok(response);
         }
         [HttpPost("EmailCandidateSection")]
-        public async Task<IActionResult> EmailCandidateSection(EmailCandidateSectionRes request)
+        public async Task<IActionResult> EmailCandidateSection([FromBody]EmailCandidateSectionRes request)
         {
             var response = await _dashboardService.EmailCandidateSection(request);
             return Ok(response);
