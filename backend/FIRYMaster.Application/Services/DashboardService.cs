@@ -17,5 +17,9 @@ namespace FIRYMaster.Application.Services
         {
             return await _dashboardRepository.EmailSection();
         }
+        public async Task<DashboardResponse> EmailCandidateSection(EmailCandidateSectionRes request)
+        {
+            return await _dashboardRepository.EmailCandidateSection(request);
+        }
     }
 }

@@ -1,79 +1,48 @@
-﻿using Azure;
-using Azure.Core;
 using FIRYMaster.Application.DTOs;
 using FIRYMaster.Application.Services;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace FIRYMaster.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class EmailSettingsController : ControllerBase
     {
         private readonly EmailSettingsService _emailSettingsService;
+
         public EmailSettingsController(EmailSettingsService emailSettingsService)
         {
             _emailSettingsService = emailSettingsService;
         }
+
         [HttpGet("GetEmailSettings")]
-        public async Task<IActionResult> GetEamilSettings()
+        public async Task<IActionResult> GetEmailSettings()
         {
-            List<EmailSettings> response = new List<EmailSettings>();
-            try
-            {
-                response = await _emailSettingsService.GetEamilSettings();
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _emailSettingsService.GetEamilSettings();
+            return Ok(response);
         }
 
         [HttpPost("CreateEmailSetting")]
-        public async Task<IActionResult> CreateEmailSetting(string Key, string Value)
+        public async Task<IActionResult> CreateEmailSetting([FromBody] CreateEmailSettingRequest request)
         {
-            APIResponseDto response = new APIResponseDto();
-            try
-            {
-                response = await _emailSettingsService.CreateEmailSettings(Key, Value);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _emailSettingsService.CreateEmailSettings(request.Key, request.Value);
+            return Ok(response);
         }
+
         [HttpPost("DeleteEmailSetting")]
-        public async Task<IActionResult> DeleteEmailSetting(int Id)
+        public async Task<IActionResult> DeleteEmailSetting([FromQuery] int id)
         {
-            APIResponseDto response = new APIResponseDto();
-            try
-            {
-                response = await _emailSettingsService.DeleteEmailSetting(Id);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _emailSettingsService.DeleteEmailSetting(id);
+            return Ok(response);
         }
 
         [HttpPost("UpdateEmailSettings")]
-        public async Task<IActionResult> UpdateEmailSettings([FromBody]EmailSettings request)
+        public async Task<IActionResult> UpdateEmailSettings([FromBody] EmailSettings request)
         {
-            APIResponseDto response = new APIResponseDto();
-            try
-            {
-                response = await _emailSettingsService.UpdateEmailSettings(request);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode((int)HttpStatusCode.InternalServerError, ex.ToString());
-            }
-            return this.StatusCode((int)HttpStatusCode.OK, response);
+            var response = await _emailSettingsService.UpdateEmailSettings(request);
+            return Ok(response);
         }
     }
 }
