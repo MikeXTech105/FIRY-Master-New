@@ -1,3 +1,4 @@
+using FIRYMaster.Application.DTOs;
 using FIRYMaster.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,12 @@ namespace FIRYMaster.API.Controllers
         public async Task<IActionResult> EmailSection()
         {
             var response = await _dashboardService.EmailSection();
+            return Ok(response);
+        }
+        [HttpPost("EmailCandidateSection")]
+        public async Task<IActionResult> EmailCandidateSection(EmailCandidateSectionRes request)
+        {
+            var response = await _dashboardService.EmailCandidateSection(request);
             return Ok(response);
         }
     }
