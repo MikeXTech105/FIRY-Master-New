@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import toast from "react-hot-toast";
 import AddCandidateModal from "../candidate/AddCandidateModal";
+import { getToken } from "../../services/authService"; // ✅ add this import
 
 import {
     getCandidates,
     deleteCandidate,
     toggleCandidateStatus
-    
 } from "../../services/candidateService";
 
 export default function Candidate() {
@@ -19,6 +19,7 @@ export default function Candidate() {
     const [showResumeModal, setShowResumeModal] = useState(false);
     const [togglingId, setTogglingId] = useState<number | null>(null);
     const [editCandidate, setEditCandidate] = useState<any | null>(null);
+    const [resumeLoading, setResumeLoading] = useState(false); // ✅ add this
 
     useEffect(() => {
         fetchCandidates();
@@ -28,20 +29,49 @@ export default function Candidate() {
         try {
             setLoading(true);
             const res = await getCandidates();
-            console.log("Candidates:", res);
             setCandidates(res);
         } catch (error) {
-            console.error(error);
             toast.error("Failed to load candidates");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleViewResume = (resumeFilePath: string) => {
-        const url = `${import.meta.env.VITE_API_BASE_URL}/Candidate/view-resume?resumeFilePath=${encodeURIComponent(resumeFilePath)}`;
-        setResumeUrl(url);
-        setShowResumeModal(true);
+    // ✅ Token સાથે resume fetch કરો
+    const handleViewResume = async (resumeFilePath: string) => {
+        try {
+            setResumeLoading(true);
+            const token = getToken();
+
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/Candidate/view-resume?resumeFilePath=${encodeURIComponent(resumeFilePath)}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (!response.ok) throw new Error("Failed to load resume");
+
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            setResumeUrl(blobUrl);
+            setShowResumeModal(true);
+        } catch (error) {
+            toast.error("Resume load કરવામાં error આવ્યો");
+        } finally {
+            setResumeLoading(false);
+        }
+    };
+
+    // ✅ Modal બંધ થાય ત્યારે blob URL cleanup
+    const handleCloseResumeModal = () => {
+        setShowResumeModal(false);
+        if (resumeUrl) {
+            URL.revokeObjectURL(resumeUrl);
+            setResumeUrl(null);
+        }
     };
 
     const handleDelete = async (id: number) => {
@@ -61,7 +91,6 @@ export default function Candidate() {
             toast.success(`Candidate ${!current ? "activated" : "deactivated"} successfully`);
             fetchCandidates();
         } catch (error) {
-            console.error(error);
             toast.error("Status update failed");
         } finally {
             setTogglingId(null);
@@ -77,7 +106,6 @@ export default function Candidate() {
                     <h1 className="text-2xl font-bold text-gray-900">Candidates</h1>
                     <p className="text-sm text-gray-400 mt-0.5">Manage all job candidates</p>
                 </div>
-
                 <div className="flex gap-2">
                     <button
                         onClick={fetchCandidates}
@@ -88,7 +116,6 @@ export default function Candidate() {
                         </svg>
                         Refresh
                     </button>
-
                     <button
                         onClick={() => setShowModal(true)}
                         className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-all duration-200 text-sm font-medium shadow-sm shadow-blue-200"
@@ -116,10 +143,8 @@ export default function Candidate() {
                             <th className="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-
                     <tbody className="divide-y divide-gray-50">
 
-                        {/* Loading */}
                         {loading && (
                             <tr>
                                 <td colSpan={8} className="text-center py-12">
@@ -134,7 +159,6 @@ export default function Candidate() {
                             </tr>
                         )}
 
-                        {/* Empty */}
                         {!loading && candidates.length === 0 && (
                             <tr>
                                 <td colSpan={8} className="text-center py-12">
@@ -149,47 +173,43 @@ export default function Candidate() {
                             </tr>
                         )}
 
-                        {/* Data */}
                         {!loading && candidates.map((c: any, index: number) => (
                             <tr key={c.id ?? index} className="hover:bg-gray-50 transition-colors duration-150">
 
-                                <td className="px-5 py-3.5 text-sm text-gray-400 font-medium">
-                                    {index + 1}
-                                </td>
+                                <td className="px-5 py-3.5 text-sm text-gray-400 font-medium">{index + 1}</td>
 
                                 <td className="px-5 py-3.5">
                                     <div className="flex items-center gap-2.5">
                                         <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-                                            <span className="text-blue-600 text-xs font-bold">
-                                                {c.name?.charAt(0)?.toUpperCase()}
-                                            </span>
+                                            <span className="text-blue-600 text-xs font-bold">{c.name?.charAt(0)?.toUpperCase()}</span>
                                         </div>
                                         <span className="text-sm font-semibold text-gray-800">{c.name}</span>
                                     </div>
                                 </td>
 
-                                <td className="px-5 py-3.5">
-                                    <span className="text-sm text-gray-600">{c.phoneNumber}</span>
-                                </td>
-
-                                <td className="px-5 py-3.5">
-                                    <span className="text-sm text-gray-600">{c.email}</span>
-                                </td>
-
-                                <td className="px-5 py-3.5">
-                                    <span className="text-sm text-gray-600">{c.subject}</span>
-                                </td>
+                                <td className="px-5 py-3.5"><span className="text-sm text-gray-600">{c.phoneNumber}</span></td>
+                                <td className="px-5 py-3.5"><span className="text-sm text-gray-600">{c.email}</span></td>
+                                <td className="px-5 py-3.5"><span className="text-sm text-gray-600">{c.subject}</span></td>
 
                                 <td className="px-5 py-3.5">
                                     {c.resumeFilePath ? (
+                                        // ✅ Loading spinner resume fetch દરમ્યાન
                                         <button
                                             onClick={() => handleViewResume(c.resumeFilePath)}
-                                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg transition-all duration-200"
+                                            disabled={resumeLoading}
+                                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                            {resumeLoading ? (
+                                                <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                                                </svg>
+                                            ) : (
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            )}
                                             View
                                         </button>
                                     ) : (
@@ -197,7 +217,6 @@ export default function Candidate() {
                                     )}
                                 </td>
 
-                                {/* Status — animated toggle switch */}
                                 <td className="px-5 py-3.5">
                                     <button
                                         onClick={() => handleToggleStatus(c.id, c.isActive)}
@@ -205,29 +224,9 @@ export default function Candidate() {
                                         className="group relative flex items-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                         title={c.isActive ? "Click to Deactivate" : "Click to Activate"}
                                     >
-                                        {/* Track */}
-                                        <div
-                                            className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out shadow-inner ${c.isActive
-                                                ? "bg-green-500 shadow-green-200"
-                                                : "bg-red-400 shadow-red-100"
-                                                }`}
-                                        >
-                                            {/* Glow ring */}
-                                            <span
-                                                className={`absolute inset-0 rounded-full transition-all duration-300 ${c.isActive
-                                                    ? "ring-2 ring-green-300 ring-offset-1 opacity-60"
-                                                    : "ring-2 ring-red-300 ring-offset-1 opacity-60"
-                                                    }`}
-                                            />
-
-                                            {/* Thumb */}
-                                            <span
-                                                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md
-                                                    transform transition-all duration-300 ease-in-out
-                                                    flex items-center justify-center
-                                                    ${c.isActive ? "translate-x-5" : "translate-x-0"}
-                                                    group-hover:scale-90`}
-                                            >
+                                        <div className={`relative w-11 h-6 rounded-full transition-all duration-300 ease-in-out shadow-inner ${c.isActive ? "bg-green-500 shadow-green-200" : "bg-red-400 shadow-red-100"}`}>
+                                            <span className={`absolute inset-0 rounded-full transition-all duration-300 ${c.isActive ? "ring-2 ring-green-300 ring-offset-1 opacity-60" : "ring-2 ring-red-300 ring-offset-1 opacity-60"}`} />
+                                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transform transition-all duration-300 ease-in-out flex items-center justify-center ${c.isActive ? "translate-x-5" : "translate-x-0"} group-hover:scale-90`}>
                                                 {togglingId === c.id ? (
                                                     <svg className="w-2.5 h-2.5 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
                                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -246,10 +245,9 @@ export default function Candidate() {
                                         </div>
                                     </button>
                                 </td>
+
                                 <td className="px-5 py-3.5">
                                     <div className="flex items-center gap-2">
-
-                                        {/* Edit Button */}
                                         <button
                                             onClick={() => setEditCandidate(c)}
                                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-all duration-200"
@@ -257,10 +255,7 @@ export default function Candidate() {
                                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H8v-2.414a2 2 0 01.586-1.414z" />
                                             </svg>
-                                            {/* Edit */}
                                         </button>
-
-                                        {/* Delete Button */}
                                         <button
                                             onClick={() => handleDelete(c.id)}
                                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all duration-200"
@@ -269,20 +264,8 @@ export default function Candidate() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
-
                                     </div>
                                 </td>
-                                {/* <td className="px-5 py-3.5">
-                                    <button
-                                        onClick={() => handleDelete(c.id)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-all duration-200"
-                                    >
-                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-
-                                    </button>
-                                </td> */}
 
                             </tr>
                         ))}
@@ -291,12 +274,11 @@ export default function Candidate() {
                 </table>
             </div>
 
-            {/* Add Candidate Modal */}
             {(showModal || editCandidate) && (
                 <AddCandidateModal
                     closeModal={() => { setShowModal(false); setEditCandidate(null); }}
                     refreshCandidates={fetchCandidates}
-                    editData={editCandidate}  // <-- new prop
+                    editData={editCandidate}
                 />
             )}
 
@@ -304,8 +286,6 @@ export default function Candidate() {
             {showResumeModal && resumeUrl && (
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
                     <div className="bg-white w-[82%] h-[88%] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-
-                        {/* Header */}
                         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
@@ -318,8 +298,9 @@ export default function Candidate() {
                                     <p className="text-xs text-gray-400">Candidate document</p>
                                 </div>
                             </div>
+                            {/* ✅ handleCloseResumeModal — blob cleanup */}
                             <button
-                                onClick={() => setShowResumeModal(false)}
+                                onClick={handleCloseResumeModal}
                                 className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all duration-200"
                             >
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -327,18 +308,9 @@ export default function Candidate() {
                                 </svg>
                             </button>
                         </div>
-
-                        {/* PDF */}
                         <div className="flex-1">
-                            <iframe
-                                src={resumeUrl}
-                                width="100%"
-                                height="100%"
-                                title="Resume"
-                                className="border-0"
-                            />
+                            <iframe src={resumeUrl} width="100%" height="100%" title="Resume" className="border-0" />
                         </div>
-
                     </div>
                 </div>
             )}

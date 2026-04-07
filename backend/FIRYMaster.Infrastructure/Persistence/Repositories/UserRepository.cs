@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using Azure.Core;
+using Dapper;
 using FIRYMaster.Application.Common;
 using FIRYMaster.Application.DTOs;
 using FIRYMaster.Application.Interfaces;
@@ -48,6 +49,65 @@ namespace FIRYMaster.Infrastructure.Persistence.Repositories
                 parameters.Add("@Password", request.Password);
 
                 response = await connection.QueryFirstAsync<APIResponseDto>("sp_CreateUser", parameters, commandType: CommandType.StoredProcedure);
+            }
+            return response;
+        }
+        public async Task<APIResponseDto> GetUsers()
+        {
+            APIResponseDto response = new APIResponseDto();
+            List<Users> users = new List<Users>();
+            using (var connection = _context.CreateConnection())
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@StatusCode", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                parameters.Add("@Message", dbType: DbType.String, direction: ParameterDirection.Output);
+                users = (await connection.QueryAsync<Users>("sp_GetUsers", commandType: CommandType.StoredProcedure)).ToList();
+                response = new APIResponseDto
+                {
+                    StatusCode = parameters.Get<int>("@StatusCode"),
+                    Message = parameters.Get<string>("@Message"),
+                    Data = users,
+                };
+            }
+            return response;
+        }
+        public async Task<APIResponseDto> UserIsActive(int Id, bool IsActive)
+        {
+            APIResponseDto response = new APIResponseDto();
+            using (var connection = _context.CreateConnection())
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@Id", Id);
+                parameters.Add("@IsActive", IsActive);
+                parameters.Add("@StatusCode", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                parameters.Add("@Message", dbType: DbType.String, direction: ParameterDirection.Output);
+                _ = await connection.QueryAsync("sp_UserIsAvtive", commandType: CommandType.StoredProcedure);
+                response = new APIResponseDto
+                {
+                    StatusCode = parameters.Get<int>("@StatusCode"),
+                    Message = parameters.Get<string>("@Message")
+                };
+            }
+            return response;
+        }
+        public async Task<APIResponseDto> UpdateUser(UserRequest request)
+        {
+            APIResponseDto response = new APIResponseDto();
+            using (var connection = _context.CreateConnection())
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@Id", request.Id);
+                parameters.Add("@FirstName", request.FirstName);
+                parameters.Add("@LastName", request.LastName);
+                parameters.Add("@Email", request.Email);
+                parameters.Add("@StatusCode", dbType: DbType.Int32, direction: ParameterDirection.Output);
+                parameters.Add("@Message", dbType: DbType.String, direction: ParameterDirection.Output);
+                _ = await connection.QueryFirstAsync("sp_UpdateUser", commandType: CommandType.StoredProcedure);
+                response = new APIResponseDto
+                {
+                    StatusCode = parameters.Get<int>("@StatusCode"),
+                    Message = parameters.Get<string>("@Message")
+                };
             }
             return response;
         }

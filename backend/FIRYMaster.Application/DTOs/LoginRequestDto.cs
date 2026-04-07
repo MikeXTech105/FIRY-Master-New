@@ -13,6 +13,8 @@ namespace FIRYMaster.Application.DTOs
 
     public class UserRequest
     {
+        [Required]
+        public int Id { get; set; }
         [Required, MaxLength(100)]
         public string FirstName { get; set; } = string.Empty;
 

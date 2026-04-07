@@ -1,8 +1,33 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { removeToken, getToken } from "../../services/authService";
+
+// JWT token માંથી user info કાઢો
+const getUserFromToken = () => {
+  try {
+    const token = getToken();
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload;
+  } catch {
+    return null;
+  }
+};
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
+  const user = getUserFromToken();
+
+  // નામનો પહેલો અક્ષર avatar માટે
+  const userName = user?.firstName || user?.name || user?.unique_name || "Admin";
+  const userRole = user?.role || "Administrator";
+  const avatarLetter = userName.charAt(0).toUpperCase();
+
+  const handleLogout = () => {
+    removeToken();
+    navigate("/login");
+  };
 
   const navItems = [
     {
@@ -58,7 +83,7 @@ export default function Sidebar() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M16 12H8m0 0l4-4m-4 4l4 4M4 6h16M4 18h16" />
         </svg>
       ),
-    }
+    },
   ];
 
   return (
@@ -76,7 +101,6 @@ export default function Sidebar() {
             <span className="text-lg font-bold tracking-tight text-white">FiryMaster</span>
           </div>
         )}
-
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-all duration-200"
@@ -106,19 +130,33 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Bottom User Section */}
-      <div className="px-2 py-4 border-t border-gray-800">
+      {/* Bottom User + Logout */}
+      <div className="px-2 py-4 border-t border-gray-800 space-y-2">
+
+        {/* User Info */}
         <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-800 ${!isOpen && "justify-center"}`}>
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
-            <span className="text-white text-xs font-bold">A</span>
+            <span className="text-white text-xs font-bold">{avatarLetter}</span>
           </div>
           {isOpen && (
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-white leading-tight">Admin</span>
-              <span className="text-xs text-gray-400 leading-tight">Administrator</span>
+              <span className="text-sm font-semibold text-white leading-tight">{userName}</span>
+              <span className="text-xs text-gray-400 leading-tight">{userRole}</span>
             </div>
           )}
         </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-all duration-200 w-full ${!isOpen && "justify-center"}`}
+        >
+          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          {isOpen && <span>Logout</span>}
+        </button>
+
       </div>
 
     </div>

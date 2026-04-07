@@ -10,5 +10,8 @@ namespace FIRYMaster.Application.Interfaces
     {
         Task<LoginResponseDto> Login(string email, string passwordHash);
         Task<APIResponseDto> CreateUser(UserRequest request);
+        Task<APIResponseDto> GetUsers();
+        Task<APIResponseDto> UserIsActive(int Id,bool IsActive);
+        Task<APIResponseDto> UpdateUser(UserRequest request);
     }
 }
