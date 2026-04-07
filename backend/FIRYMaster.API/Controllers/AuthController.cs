@@ -37,15 +37,6 @@ namespace FIRYMaster.API.Controllers
 
             return Ok(response);
         }
-
-        [AllowAnonymous]
-        [HttpPost("CreateUser")]
-        public async Task<IActionResult> CreateUser([FromBody] UserRequest request)
-        {
-            var response = await _authService.CreateUser(request);
-            return Ok(response);
-        }
-
         private string GenerateTokenJwt(string email)
         {
             var claims = new[]

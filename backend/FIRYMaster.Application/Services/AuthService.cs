@@ -4,6 +4,7 @@ using FIRYMaster.Application.Interfaces;
 using FIRYMaster.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Text;
 
 namespace FIRYMaster.Application.Services
@@ -29,6 +30,18 @@ namespace FIRYMaster.Application.Services
             request.Password = hashPassword;
 
             return await _userRepository.CreateUser(request);
+        }
+        public async Task<APIResponseDto> GetUsers()
+        {
+            return await _userRepository.GetUsers();
+        }
+        public async Task<APIResponseDto> UserIsActive(int Id, bool IsActive)
+        {
+            return await _userRepository.UserIsActive(Id, IsActive);
+        }
+        public async Task<APIResponseDto> UpdateUser(UserRequest request)
+        {
+            return await _userRepository.UpdateUser(request);
         }
     }
 }

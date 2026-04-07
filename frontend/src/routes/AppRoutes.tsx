@@ -13,27 +13,17 @@ function AppRoutes() {
     <BrowserRouter>
       <Routes>
 
-
+        {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-user" element={<CreateUser />} />
 
-
-        <Route path="/dashboard" element={
-          <ProtectedRoute><Dashboard /></ProtectedRoute>
-        } />
-        <Route path="/roles" element={
-          <ProtectedRoute><Roles /></ProtectedRoute>
-        } />
-        <Route path="/candidate" element={
-          <ProtectedRoute><Candidate /></ProtectedRoute>
-        } />
-        <Route path="/emails" element={
-          <ProtectedRoute><Emails /></ProtectedRoute>
-        } />
-        <Route path="/email-settings" element={
-          <ProtectedRoute><EmailSettings /></ProtectedRoute>
-        } />
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/roles" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
+        <Route path="/candidate" element={<ProtectedRoute><Candidate /></ProtectedRoute>} />
+        <Route path="/emails" element={<ProtectedRoute><Emails /></ProtectedRoute>} />
+        <Route path="/email-settings" element={<ProtectedRoute><EmailSettings /></ProtectedRoute>} />
 
       </Routes>
     </BrowserRouter>
