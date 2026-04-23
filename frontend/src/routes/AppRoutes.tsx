@@ -7,6 +7,7 @@ import Candidate from "../pages/candidate/candidate";
 import Emails from "../pages/email/Emails";
 import EmailSettings from "../pages/emailSettings/EmailSettings";
 import ProtectedRoute from "./Protectedroute";
+import Users from "../pages/user/users";
 
 function AppRoutes() {
   return (
@@ -20,6 +21,7 @@ function AppRoutes() {
 
         {/* Protected Routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
         <Route path="/roles" element={<ProtectedRoute><Roles /></ProtectedRoute>} />
         <Route path="/candidate" element={<ProtectedRoute><Candidate /></ProtectedRoute>} />
         <Route path="/emails" element={<ProtectedRoute><Emails /></ProtectedRoute>} />

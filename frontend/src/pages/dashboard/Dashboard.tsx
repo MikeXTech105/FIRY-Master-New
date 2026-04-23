@@ -91,8 +91,8 @@ function DonutChart({ sent, failed, queued }: { sent: number; failed: number; qu
       </div>
       <div className="flex flex-col gap-3">
         {[{ color: "bg-green-500", label: "Sent", val: sent, pct: sentPct },
-          { color: "bg-red-500", label: "Failed", val: failed, pct: failedPct },
-          { color: "bg-blue-500", label: "In Queue", val: queued, pct: queuedPct }].map(i => (
+        { color: "bg-red-500", label: "Failed", val: failed, pct: failedPct },
+        { color: "bg-blue-500", label: "In Queue", val: queued, pct: queuedPct }].map(i => (
           <div key={i.label} className="flex items-center gap-2.5">
             <div className={`w-2.5 h-2.5 rounded-full ${i.color} shrink-0`} />
             <div>
@@ -347,7 +347,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
             <StatCard label="Total Queue" value={stats.totalEmailQueue} color="text-blue-600" bgColor="bg-blue-500" ringColor="ring-blue-100" delay={0} animate={animate} description="All emails ever queued"
               icon={<svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>} />
-            <StatCard label="Today's Queue" value={stats.todayEmailQueue} color="text-violet-600" bgColor="bg-violet-500" ringColor="ring-violet-100" delay={100} animate={animate} description="Emails queued today"
+            <StatCard label="Today's Queue" value={Math.max(0, stats.todayEmailQueue - stats.todaySentEmail)} color="text-violet-600" bgColor="bg-violet-500" ringColor="ring-violet-100" delay={100} animate={animate} description="Remaining in queue today"
               icon={<svg className="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
             <StatCard label="Sent Today" value={stats.todaySentEmail} color="text-green-600" bgColor="bg-green-500" ringColor="ring-green-100" delay={200} animate={animate} description="Successfully delivered today"
               icon={<svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />

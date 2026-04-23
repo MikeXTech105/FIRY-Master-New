@@ -2,7 +2,6 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { removeToken, getToken } from "../../services/authService";
 
-// JWT token માંથી user info કાઢો
 const getUserFromToken = () => {
   try {
     const token = getToken();
@@ -19,7 +18,6 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const user = getUserFromToken();
 
-  // નામનો પહેલો અક્ષર avatar માટે
   const userName = user?.firstName || user?.name || user?.unique_name || "Admin";
   const userRole = user?.role || "Administrator";
   const avatarLetter = userName.charAt(0).toUpperCase();
